@@ -1,22 +1,16 @@
 package com.checkhall;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.provider.Settings.Secure;
 
 import com.checkhall.util.DeviceUtil;
 
-import java.io.UnsupportedEncodingException;
-import java.util.UUID;
 
 public class IntroActivity extends AppCompatActivity {
 
@@ -25,17 +19,42 @@ public class IntroActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
 
-        Log.d("IntroActivity", "uuid="+ DeviceUtil.getDeviceUUID(this));
+        if ( !checkFCMIntent() ) {
+            checkLogined();
+            Log.d("IntroActivity", "uuid=" + DeviceUtil.getDeviceUUID(this));
+            ImageView button = (ImageView) findViewById(R.id.button);
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(IntroActivity.this, MainActivity.class);
+                    startActivity(i);
+                    finish();
+                }
+            });
+        }
+    }
 
-        ImageView button = (ImageView) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(IntroActivity.this, MainActivity.class);
-                startActivity(i);
-                finish();
-            }
-        });
+    private boolean checkFCMIntent(){
+        Log.i("Intro","title=" + getIntent().getStringExtra("title"));
+        Log.i("Intro","body=" + getIntent().getStringExtra("body"));
+        Log.i("Intro","action_url=" + getIntent().getStringExtra("action_url"));
+        if(getIntent().getStringExtra("action_url") != null && !getIntent().getStringExtra("action_url").isEmpty() && !getIntent().getStringExtra("action_url").equals("")){
+            Log.i("Intro","intent with url=" + getIntent().getStringExtra("action_url"));
+            Intent i = new Intent(IntroActivity.this, MainActivity.class);
+            i.putExtra("action_url",getIntent().getStringExtra("action_url"));
+            startActivity(i);
+            finish();
+            return true;
+        }
+        return false;
+    }
+
+    private void checkLogined(){
+        if( DeviceUtil.isLogined(this)) {
+            Intent i = new Intent(IntroActivity.this, MainActivity.class);
+            startActivity(i);
+            finish();
+        }
     }
 
     @Override

@@ -19,6 +19,7 @@ public class DeviceUtil {
     protected static final String PREFS_DEVICE_ID = "device_id";
     protected static final String PREFS_USER_IDX = "user_idx";
     protected static final String PREFS_PUSH_TOKEN = "push_token";
+    protected static final String PREFS_LOGINED = "logined";
     public static String getDeviceUUID(final Context context) {
         final SharedPreferences prefs = context.getSharedPreferences( PREFS_FILE, 0);
         final String id = prefs.getString(PREFS_DEVICE_ID, null );
@@ -69,5 +70,17 @@ public class DeviceUtil {
     public static String getUserIdx(final Context context ){
         final SharedPreferences prefs = context.getSharedPreferences( PREFS_FILE, 0);
         return prefs.getString(PREFS_USER_IDX, null );
+    }
+
+    public static void setLogined(final Context context){
+        final SharedPreferences prefs = context.getSharedPreferences( PREFS_FILE, 0);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(PREFS_LOGINED, true);
+        editor.commit();
+    }
+
+    public static boolean isLogined(final Context context ){
+        final SharedPreferences prefs = context.getSharedPreferences( PREFS_FILE, 0);
+        return prefs.getBoolean(PREFS_LOGINED, false);
     }
 }

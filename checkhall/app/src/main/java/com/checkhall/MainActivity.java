@@ -1,9 +1,12 @@
 package com.checkhall;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -26,24 +29,83 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    private WebView webview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        webview = (WebView) findViewById(R.id.webview);
 
-        WebView webview = (WebView) findViewById(R.id.webview);
+        initWebView();
+    }
+    private String getActionUrl(){
+        String url = null;
+        Bundle extras = getIntent().getExtras();
+        if(extras != null){
+            url = extras.get("action_url").toString();
+        } else {
+            url = "http://www.checkhall.com/member/login.jsp";
+        }
+        return url;
+    }
+
+    private void initWebView(){
         webview.setWebViewClient(new WishWebViewClient ());
         webview.setWebChromeClient(new WishWebChromeClient());
         WebSettings webSettings = webview.getSettings();
         webSettings.setAppCacheEnabled(false);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-//      if (Build.VERSION.SDK_INT >= 19) {
-//            webview.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-//        }
+        Log.i("Main","initWebView loadUrl=" + getActionUrl());
+        webview.loadUrl(getActionUrl());
+    }
 
-        webview.loadUrl("http://www.checkhall.com/member/login.jsp");
+    private boolean isLastPag(){
+        Log.d("Main", "isLastPag url=" + webview.getUrl());
+        if( !webview.canGoBack() || webview.getUrl().equals("http://www.checkhall.com/plan/")
+          || webview.getUrl().equals("http://www.checkhall.com/member/login.jsp")){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && !isLastPag()) {
+            webview.goBack();
+            return true;
+        }
+
+        alertAppFinish();
+        return true;
+        //return super.onKeyDown(keyCode, event);
+    }
+
+    private void alertAppFinish(){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        // AlertDialog 셋팅
+        alertDialogBuilder
+                .setMessage("앱을 종료하시겠습니까?")
+                .setCancelable(false)
+                .setPositiveButton("종료",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(
+                                    DialogInterface dialog, int id) {
+                                // 프로그램을 종료한다
+                                MainActivity.this.finish();
+                            }
+                        })
+                .setNegativeButton("취소",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(
+                                    DialogInterface dialog, int id) {
+                                // 다이얼로그를 취소한다
+                                dialog.cancel();
+                            }
+                        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     private class WishWebChromeClient extends WebChromeClient{
@@ -66,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                                 connection.getOutputStream().write(data.getBytes());
                                 if (connection.getResponseCode() == 200) {
                                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
+                                    DeviceUtil.setLogined(MainActivity.this);
                                     Log.d("TokenId","TokenId register Success - " + connection.getResponseCode() + "," + reader.readLine());
                                 } else {
                                     Log.d("TokenId","TokenId register fail - " + connection.getResponseCode() + ", "+ connection.getResponseMessage());
