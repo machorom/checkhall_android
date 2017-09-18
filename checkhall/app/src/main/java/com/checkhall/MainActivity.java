@@ -73,14 +73,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && !isLastPag()) {
-            webview.goBack();
+        Log.i("MainActivity","onKeyDown keyCode="+keyCode);
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if(!isLastPag()) {
+                webview.goBack();
+            } else {
+                alertAppFinish();
+            }
             return true;
         }
-
-        alertAppFinish();
-        return true;
-        //return super.onKeyDown(keyCode, event);
+        return super.onKeyDown(keyCode, event);
     }
 
     private void alertAppFinish(){
