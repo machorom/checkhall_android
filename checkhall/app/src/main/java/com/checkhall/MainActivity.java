@@ -64,8 +64,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean isLastPag(){
         Log.d("Main", "isLastPag url=" + webview.getUrl());
         if( webview.getUrl().equals("http://www.checkhall.com/plan/")
-          || webview.getUrl().equals("http://www.checkhall.com/member/login.jsp")
-          || !webview.canGoBack() ){
+                || webview.getUrl().equals("http://www.checkhall.com/hall/")
+                || webview.getUrl().equals("http://www.checkhall.com/")
+                || webview.getUrl().equals("http://www.checkhall.com/member/login.jsp")
+                || !webview.canGoBack() ){
             return true;
         }
         return false;
