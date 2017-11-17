@@ -31,9 +31,12 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,7 +61,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("HybridApp", "SEND_SMS obj=" + msg.obj );
                     uri = Uri.parse("smsto:"+((HashMap<String, String>)msg.obj).get("mobile_no"));
                     it = new Intent(Intent.ACTION_SENDTO, uri);
-                    it.putExtra("sms_body", ((HashMap<String, String>)msg.obj).get("body"));
+                    try {
+                        it.putExtra("sms_body", URLDecoder.decode(((HashMap<String, String>)msg.obj).get("body"),"UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                     startActivity(it);
                     break;
 
@@ -67,7 +74,11 @@ public class MainActivity extends AppCompatActivity {
                     it = new Intent(Intent.ACTION_SEND);
                     it.putExtra(Intent.EXTRA_EMAIL, ((HashMap<String, String>)msg.obj).get("email"));
                     it.putExtra(Intent.EXTRA_SUBJECT, ((HashMap<String, String>)msg.obj).get("title"));
-                    it.putExtra(Intent.EXTRA_TEXT, ((HashMap<String, String>)msg.obj).get("body"));
+                    try {
+                        it.putExtra(Intent.EXTRA_TEXT, URLDecoder.decode(((HashMap<String, String>)msg.obj).get("body"),"UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                     it.setType("text/plain");
                     startActivity(Intent.createChooser(it, "Choose Email Client"));
                     break;
@@ -97,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 //                            .setUrl("http://www.kakao.com")
 //                            .build());
 
-            kakaoTalkLinkMessageBuilder.addWebLink(link, link);
+            kakaoTalkLinkMessageBuilder.addWebLink(link, URLDecoder.decode(link,"UTF-8"));
             // 웹싸이트에 등록된 kakao<app_key>://kakaolink로 이동
 //                kakaoTalkLinkMessageBuilder.addAppButton(getString(R.string.kakaolink_appbutton), new AppActionBuilder()
 //                        .addActionInfo(AppActionInfoBuilder.createAndroidActionInfoBuilder().setExecuteParam("execparamkey2=2222").setMarketParam("referrer=kakaotalklink").build())
@@ -108,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
             kakaoLink.sendMessage(kakaoTalkLinkMessageBuilder, this);
         } catch (KakaoParameterException e) {
             Log.d("HybridApp",e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
     }
 
