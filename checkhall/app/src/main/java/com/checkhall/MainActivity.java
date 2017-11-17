@@ -165,13 +165,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onKeyDown(intw keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
         Log.i("MainActivity","onKeyDown keyCode="+keyCode);
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if(!isLastPag()) {
                 webview.goBack();
             } else {
-                alertAppFinish();w
+                alertAppFinish();
             }
             return true;
         }
@@ -231,10 +231,10 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             } catch (MalformedURLException e) {
                                 e.printStackTrace();
-                                Log.e("HybridApp",e.getMessage())
+                                Log.e("HybridApp",e.getMessage());
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                Log.e("HybridApp",e.getMessage())
+                                Log.e("HybridApp",e.getMessage());
                             }
                         }
                     });
