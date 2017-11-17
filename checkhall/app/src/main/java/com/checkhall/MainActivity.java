@@ -82,11 +82,11 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    private KakaoLink kakaoLink;
-    private KakaoTalkLinkMessageBuilder kakaoTalkLinkMessageBuilder;
     private void sendKakaoMessage(String type, String title, String imageUrl, String link)
     {
         try {
+            KakaoLink kakaoLink = KakaoLink.getKakaoLink(getApplicationContext());
+            KakaoTalkLinkMessageBuilder kakaoTalkLinkMessageBuilder = kakaoLink.createKakaoTalkLinkMessageBuilder();
             kakaoTalkLinkMessageBuilder.addText(title);
             kakaoTalkLinkMessageBuilder.addImage(imageUrl, 300, 200);
             // 앱이 설치되어 있는 경우 kakao<app_key>://kakaolink?execparamkey1=1111 로 이동. 앱이 설치되어 있지 않은 경우 market://details?id=com.kakao.sample.kakaolink&referrer=kakaotalklink 또는 https://itunes.apple.com/app/id12345로 이동
@@ -118,13 +118,6 @@ public class MainActivity extends AppCompatActivity {
         webview = (WebView) findViewById(R.id.webview);
 
         initWebView();
-
-        try {
-            kakaoLink = KakaoLink.getKakaoLink(getApplicationContext());
-            kakaoTalkLinkMessageBuilder = kakaoLink.createKakaoTalkLinkMessageBuilder();
-        } catch (KakaoParameterException e) {
-            Log.d("HybridApp",e.getMessage());
-        }
     }
     private String getActionUrl(){
         String url = null;
