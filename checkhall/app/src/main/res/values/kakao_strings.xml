@@ -1,0 +1,5 @@
+<resources>
+    <string name="kakao_app_key">d1d0ccbbf25b96bd376a89d874a291ad</string>
+    <string name="kakao_scheme">kakaod1d0ccbbf25b96bd376a89d874a291ad</string>
+    <string name="kakaolink_host">kakaolink</string>
+</resources>

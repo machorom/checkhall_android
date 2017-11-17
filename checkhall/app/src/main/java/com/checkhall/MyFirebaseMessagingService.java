@@ -19,13 +19,14 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FCM Service";
+    private static int REQUERS_ID=1;
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         // TODO: Handle FCM messages here.
         // If the application is in the foreground handle both data and notification messages here.
         // Also if you intend on generating your own notifications as a result of a received FCM
         // message, here is where that should be initiated.
-        Log.d(TAG, "From: " + remoteMessage.getFrom());
+        Log.d(TAG, "From: " + remoteMessage.getFrom() + ", RID=" + REQUERS_ID);
         Log.d(TAG, "data.action_url: " + remoteMessage.getData().get("action_url"));
         Log.d(TAG, "Notification Message Body: " + remoteMessage.getNotification().getBody());
         Log.d(TAG, "Notification Message ClickAction: " + remoteMessage.getNotification().getClickAction());
@@ -44,14 +45,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent( REQUERS_ID, PendingIntent.FLAG_ONE_SHOT);
         mBuilder.setContentIntent(resultPendingIntent);
         NotificationManager mNotificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(0, mBuilder.build());
+        mNotificationManager.notify(REQUERS_ID, mBuilder.build());
+        REQUERS_ID++;
     }
 }
