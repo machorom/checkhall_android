@@ -3,10 +3,12 @@ package com.checkhall;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,6 +22,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.checkhall.util.AlertUtil;
 import com.checkhall.util.DeviceUtil;
 import com.kakao.kakaolink.KakaoLink;
 import com.kakao.kakaolink.KakaoTalkLinkMessageBuilder;
@@ -29,7 +32,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -44,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     final static int SEND_SMS = 2;
     final static int SEND_EMAIL = 3;
     final static int MAKE_ACALL = 4;
+    final static int UPLOAD_PROFILE = 5;
+
+    final static int REQUEST_GALLARY_CODE = 1;
 
     private WebView webview;
     private Handler mHandler = new Handler(){
@@ -89,9 +98,44 @@ public class MainActivity extends AppCompatActivity {
                     it = new Intent(Intent.ACTION_DIAL, uri);
                     startActivity(it);
                     break;
+                case UPLOAD_PROFILE:
+                    Log.d("HybridApp", "UPLOAD_PROFILE obj=" + msg.obj );
+                    mUploadUrl = ((HashMap<String, String>)msg.obj).get("action_url");
+                    //((HashMap<String, String>)msg.obj).get("enctype");
+                    mCallbackMethod = ((HashMap<String, String>)msg.obj).get("callback");
+                    Intent intent = new Intent(Intent.ACTION_PICK);
+                    intent.setData(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    intent.setType("image/*");
+                    startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_GALLARY_CODE);
+                    break;
             }
         }
     };
+
+    private String mUploadUrl = null;
+    private String mCallbackMethod = null;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_GALLARY_CODE:
+                    Log.d("HybridApp","REQUEST_GALLARY_CODE intent="+data);
+                    Log.d("HybridApp","imagePath="+getImagePath(data));
+                    new HttpUploadTask().execute(mUploadUrl, getImagePath(data));
+
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    private String getImagePath(Intent data){
+        Uri selPhotoUri = data.getData();
+        Cursor c = getContentResolver().query(Uri.parse(selPhotoUri.toString()), null,null,null,null);
+        c.moveToNext();
+        return c.getString(c.getColumnIndex( MediaStore.MediaColumns.DATA));
+    }
 
     private void sendKakaoMessage(String type, String title, String imageUrl, String link)
     {
@@ -273,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class AndroidBridge {
-        private void sendHandMessage(int what, Object obj){
+        private void sendHandMessage(int what, Object obj) {
             Message message = mHandler.obtainMessage();
             message.what = what;
             message.obj = obj;
@@ -282,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void sendKakao(final String type, final String title, final String imageUrl, final String link) {
-            Log.d("HybridApp", "sendKakao("+type+","+title+", "+imageUrl+","+link+")");
+            Log.d("HybridApp", "sendKakao(" + type + "," + title + ", " + imageUrl + "," + link + ")");
             HashMap<String, String> paramMap = new HashMap();
             paramMap.put("type", type);
             paramMap.put("title", title);
@@ -318,5 +362,115 @@ public class MainActivity extends AppCompatActivity {
             sendHandMessage(MAKE_ACALL, paramMap);
         }
 
+        @JavascriptInterface
+        public void uploadFile(final String action_url, final String enctype, final String callback) {
+            Log.d("HybridApp", "uploadFile(" + action_url + ", " + enctype + ", " + callback + ")");
+            HashMap<String, String> paramMap = new HashMap();
+            paramMap.put("action_url", action_url);
+            paramMap.put("enctype", enctype);
+            paramMap.put("callback", callback);
+            sendHandMessage(UPLOAD_PROFILE, paramMap);
+        }
+    }
+    private class HttpUploadTask extends  AsyncTask<String, Void, String> {
+
+        final private String lineEnd = "\r\n";
+        final private String twoHyphens = "--";
+        final private String boundary = "*****";
+
+        public String HttpFileUpload(String urlString, String fileName) {
+            String result = null;
+            try {
+                FileInputStream fileInputStream = new FileInputStream(fileName);
+                URL connectUrl = new URL(urlString);
+                Log.d("HybridApp", "HttpFileUpload / fileInputStream  is " + fileInputStream);
+
+                // open connection
+                HttpURLConnection conn = (HttpURLConnection)connectUrl.openConnection();
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setUseCaches(false);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Connection", "Keep-Alive");
+                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+
+                // write data
+                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"uploadedfile\";filename=\"" + fileName+"\"" + lineEnd);
+                dos.writeBytes(lineEnd);
+
+                int bytesAvailable = fileInputStream.available();
+                int maxBufferSize = 1024;
+                int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+
+                byte[] buffer = new byte[bufferSize];
+                int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                Log.d("HybridApp", "Image bytesAvailable="+bytesAvailable);
+
+                // read image
+                int writedSize = 0;
+                while (bytesRead > 0) {
+                    dos.write(buffer, 0, bufferSize);
+                    writedSize += bufferSize;
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+                }
+
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+                // close streams
+                Log.d("HybridApp" , "File is written complete size = "+writedSize);
+                fileInputStream.close();
+                dos.flush(); // finish upload...
+
+                // get response
+                int ch;
+                InputStream is = conn.getInputStream();
+                StringBuffer b =new StringBuffer();
+                while( ( ch = is.read() ) != -1 ){
+                    b.append( (char)ch );
+                }
+                result =new String(b.toString().getBytes(), "utf-8");
+                Log.d("HybridApp", "result = " + result);
+                dos.close();
+            } catch (Exception e) {
+                Log.e("HybridApp", "exception " + e.getMessage());
+            }
+            return result;
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            Log.d("HybridApp","doInBackground strings.length="+strings.length);
+            Log.d("HybridApp","doInBackground strings[0]"+strings[0]);
+            Log.d("HybridApp","doInBackground strings[1]"+strings[1]);
+            return HttpFileUpload(strings[0], strings[1]);
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            Log.d("HybridApp","onPostExecute s="+s.trim());
+            //결과가 성공여부인지도 따져야 한다.
+            try {
+                JSONObject jsonObj = new JSONObject(s);
+                if( jsonObj.get("result").equals("Y")){
+                    Log.d("HybridApp", "onPostExecute result sucess call javascript:"+mCallbackMethod);
+                    webview.loadUrl("javascript:"+mCallbackMethod);
+                } else {
+                    AlertUtil.showAlert(MainActivity.this, "이미지 등록 실패 ("+jsonObj.get("resultMsg")+")");
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                AlertUtil.showAlert(MainActivity.this, "이미지 등록 실패 (json parser exception)");
+            }
+            // 업로드 완료후 의 액션인...javascript를 호출해주면 된다.
+            super.onPostExecute(s);
+        }
     }
 }
+
+
