@@ -151,20 +151,20 @@ public class MainActivity extends AppCompatActivity {
 //                            .addActionInfo(AppActionInfoBuilder.createiOSActionInfoBuilder(AppActionBuilder.DEVICE_TYPE.PHONE).setExecuteParam("execparamkey1=1111").build())
 //                            .setUrl("http://www.kakao.com")
 //                            .build());
-
-            kakaoTalkLinkMessageBuilder.addWebLink(link, URLDecoder.decode(link,"UTF-8"));
+            //kakaoTalkLinkMessageBuilder.addWebLink(link, URLDecoder.decode(link,"UTF-8"));
             // 웹싸이트에 등록된 kakao<app_key>://kakaolink로 이동
 //                kakaoTalkLinkMessageBuilder.addAppButton(getString(R.string.kakaolink_appbutton), new AppActionBuilder()
 //                        .addActionInfo(AppActionInfoBuilder.createAndroidActionInfoBuilder().setExecuteParam("execparamkey2=2222").setMarketParam("referrer=kakaotalklink").build())
 //                        .addActionInfo(AppActionInfoBuilder.createiOSActionInfoBuilder(AppActionBuilder.DEVICE_TYPE.PHONE).setExecuteParam("execparamkey2=2222").build())
 //                        .setUrl("http://www.kakao.com").build());
                 // 웹싸이트에 등록한 "http://www.kakao.com"으로 이동.
-            kakaoTalkLinkMessageBuilder.addWebButton("연결", null);
+            kakaoTalkLinkMessageBuilder.addWebButton("연결", link);
             kakaoLink.sendMessage(kakaoTalkLinkMessageBuilder, this);
         } catch (KakaoParameterException e) {
             Log.d("HybridApp",e.getMessage());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//            Log.d("HybridApp",e.getMessage());
         }
     }
 
@@ -472,5 +472,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 }
+
 
 
