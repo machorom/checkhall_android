@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -14,6 +15,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
@@ -172,10 +175,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        webview = (WebView) findViewById(R.id.webview);
 
+        webview = (WebView) findViewById(R.id.webview);
         initWebView();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection deprecation
+            CookieSyncManager.getInstance().startSync();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection deprecation
+            CookieSyncManager.getInstance().stopSync();
+        }
+    }
+
     private String getActionUrl(){
         String url = null;
         Bundle extras = getIntent().getExtras();
@@ -188,6 +210,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initWebView(){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            //noinspection deprecation
+            CookieSyncManager.createInstance(this);
+        }
         webview.setWebViewClient(new WishWebViewClient ());
         webview.setWebChromeClient(new WishWebChromeClient());
         WebSettings webSettings = webview.getSettings();
@@ -313,6 +339,20 @@ public class MainActivity extends AppCompatActivity {
             Log.d("HybridApp","shouldOverrideUrlLoading url="+url);
             view.loadUrl(url);
             return true;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            /* NOTICE 로그인을 한 다음 앱을 종료하고, 다시 앱을 실행했을 때 간헐적으로 로그인이 안 된 상태가 된다.
+             이는 웹뷰의 RAM과 영구 저장소 사이에 쿠키가 동기화가 안 되어 있기 때문이다. 따라서 강제로 동기화를 해준다. */
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                //noinspection deprecation
+                CookieSyncManager.getInstance().sync();
+            } else {
+                // 롤리팝 이상에서는 CookieManager의 flush를 하도록 변경됨.
+                CookieManager.getInstance().flush();
+            }
+            super.onPageFinished(view, url);
         }
     }
 

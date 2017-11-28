@@ -18,7 +18,7 @@ import com.google.firebase.messaging.RemoteMessage;
  */
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
-    private static final String TAG = "FCM Service";
+    private static final String TAG = "FirebaseMessage";
     private static int REQUERS_ID=1;
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -32,7 +32,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Log.d(TAG, "Notification Message ClickAction: " + remoteMessage.getNotification().getClickAction());
         Log.d(TAG, "Notification Message notification: " + remoteMessage.getNotification().toString());
 
-        Uri sound= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        //Uri sound= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        String uri = "android.resource://com.checkhall/" + R.raw.checkhall;
+        Log.d(TAG, "notification sound uri= " + uri);
+        Uri sound = Uri.parse(uri);
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher)
@@ -41,6 +44,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setAutoCancel(true)
                         .setSound(sound);
         Intent resultIntent = new Intent(this, MainActivity.class);
+        resultIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         resultIntent.putExtra("action_url",remoteMessage.getData().get("action_url"));
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
