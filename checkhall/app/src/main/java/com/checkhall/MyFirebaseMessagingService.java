@@ -18,7 +18,7 @@ import com.google.firebase.messaging.RemoteMessage;
  */
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
-    private static final String TAG = "FirebaseMessage";
+    private static final String TAG = "LCheckhall:MyFirebaseMessagingService";
     private static int REQUERS_ID=1;
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {

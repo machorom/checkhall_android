@@ -49,6 +49,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "LCheckhall:MainActivity";
     final static int SEND_KAKAO = 1;
     final static int SEND_SMS = 2;
     final static int SEND_EMAIL = 3;
@@ -65,12 +66,12 @@ public class MainActivity extends AppCompatActivity {
             Uri uri = null;
             switch (msg.what) {
                 case SEND_KAKAO:
-                    Log.d("HybridApp", "SEND_KAKAO obj=" + msg.obj );
+                    Log.d(TAG, "SEND_KAKAO obj=" + msg.obj );
                     sendKakaoMessage(((HashMap<String, String>)msg.obj).get("type"),((HashMap<String, String>)msg.obj).get("title"), ((HashMap<String, String>)msg.obj).get("imageUrl"), ((HashMap<String, String>)msg.obj).get("link"));
                     break;
 
                 case SEND_SMS:
-                    Log.d("HybridApp", "SEND_SMS obj=" + msg.obj );
+                    Log.d(TAG, "SEND_SMS obj=" + msg.obj );
                     uri = Uri.parse("smsto:"+((HashMap<String, String>)msg.obj).get("mobile_no"));
                     it = new Intent(Intent.ACTION_SENDTO, uri);
                     try {
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case SEND_EMAIL:
-                    Log.d("HybridApp", "SEND_EMAIL obj=" + msg.obj );
+                    Log.d(TAG, "SEND_EMAIL obj=" + msg.obj );
                     it = new Intent(Intent.ACTION_SEND);
                     it.putExtra(Intent.EXTRA_EMAIL, ((HashMap<String, String>)msg.obj).get("email"));
                     it.putExtra(Intent.EXTRA_SUBJECT, ((HashMap<String, String>)msg.obj).get("title"));
@@ -96,13 +97,13 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case MAKE_ACALL:
-                    Log.d("HybridApp", "MAKE_ACALL obj=" + msg.obj );
+                    Log.d(TAG, "MAKE_ACALL obj=" + msg.obj );
                     uri = Uri.parse("tel:" + ((HashMap<String, String>)msg.obj).get("phone_number"));
                     it = new Intent(Intent.ACTION_DIAL, uri);
                     startActivity(it);
                     break;
                 case UPLOAD_PROFILE:
-                    Log.d("HybridApp", "UPLOAD_PROFILE obj=" + msg.obj );
+                    Log.d(TAG, "UPLOAD_PROFILE obj=" + msg.obj );
                     mUploadUrl = ((HashMap<String, String>)msg.obj).get("action_url");
                     //((HashMap<String, String>)msg.obj).get("enctype");
                     mCallbackMethod = ((HashMap<String, String>)msg.obj).get("callback");
@@ -123,8 +124,8 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_GALLARY_CODE:
-                    Log.d("HybridApp","REQUEST_GALLARY_CODE intent="+data);
-                    Log.d("HybridApp","imagePath="+getImagePath(data));
+                    Log.d(TAG,"REQUEST_GALLARY_CODE intent="+data);
+                    Log.d(TAG,"imagePath="+getImagePath(data));
                     new HttpUploadTask().execute(mUploadUrl, getImagePath(data));
 
                     break;
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
             kakaoTalkLinkMessageBuilder.addWebButton("연결", link);
             kakaoLink.sendMessage(kakaoTalkLinkMessageBuilder, this);
         } catch (KakaoParameterException e) {
-            Log.d("HybridApp",e.getMessage());
+            Log.d(TAG,e.getMessage());
 //        } catch (UnsupportedEncodingException e) {
 //            e.printStackTrace();
 //            Log.d("HybridApp",e.getMessage());
@@ -221,12 +222,12 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setJavaScriptEnabled(true);
         webview.addJavascriptInterface(new AndroidBridge(), "HybridApp");
         webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        Log.i("HybridApp","initWebView loadUrl=" + getActionUrl());
+        Log.i(TAG,"initWebView loadUrl=" + getActionUrl());
         webview.loadUrl(getActionUrl());
     }
 
     private boolean isLastPag(){
-        Log.d("HybridApp", "isLastPag url=" + webview.getUrl());
+        Log.d(TAG, "isLastPag url=" + webview.getUrl());
         if( webview.getUrl().equals("http://www.checkhall.com/plan/")
                 || webview.getUrl().equals("http://www.checkhall.com/hall/")
                 || webview.getUrl().equals("http://www.checkhall.com/hall/index.jsp")
@@ -295,32 +296,33 @@ public class MainActivity extends AppCompatActivity {
                                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                                 connection.setRequestMethod("POST");
                                 String data = "idx="+DeviceUtil.getUserIdx(MainActivity.this)+"&device_id="+ DeviceUtil.getDeviceUUID(MainActivity.this)+"&push_type=fcm&push_token="+DeviceUtil.getPushTokenId(MainActivity.this);
-                                Log.d("HybridApp","TokenId register param - " + data);
+                                Log.d(TAG,"TokenId register param - " + data);
                                 connection.setDoOutput(true);
                                 connection.getOutputStream().write(data.getBytes());
                                 if (connection.getResponseCode() == 200) {
                                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
                                     DeviceUtil.setLogined(MainActivity.this);
-                                    Log.d("HybridApp","TokenId register Success - " + connection.getResponseCode() + "," + reader.readLine());
+                                    Log.d(TAG,"TokenId register Success - " + connection.getResponseCode() + "," + reader.readLine());
                                 } else {
-                                    Log.d("HybridApp","TokenId register fail - " + connection.getResponseCode() + ", "+ connection.getResponseMessage());
+                                    Log.d(TAG,"TokenId register fail - " + connection.getResponseCode() + ", "+ connection.getResponseMessage());
                                 }
                             } catch (MalformedURLException e) {
                                 e.printStackTrace();
-                                Log.e("HybridApp",e.getMessage());
+                                Log.e(TAG,e.getMessage());
                             } catch (IOException e) {
                                 e.printStackTrace();
-                                Log.e("HybridApp",e.getMessage());
+                                Log.e(TAG,e.getMessage());
                             }
                         }
                     });
-                    Log.d("HybridApp", "server.idx = " + jobj.getString("idx"));
+                    Log.d(TAG, "server.idx = " + jobj.getString("idx"));
                     DeviceUtil.setUserIdx(MainActivity.this, jobj.getString("idx"));
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    Log.d(TAG, "onConsoleMessage JSONException " + e.getMessage());
                 }
             }
-            Log.d("HybridApp", cm.message() + " -- From line "
+            Log.d(TAG, cm.message() + " -- From line "
                     + cm.lineNumber() + " of "
                     + cm.sourceId() );
             return true;
@@ -330,13 +332,32 @@ public class MainActivity extends AppCompatActivity {
     private class WishWebViewClient extends WebViewClient {
        @Override
         public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-            Log.d("HybridApp", "onReceivedError " + error.getDescription().toString() );
+
+            Log.d(TAG, "onReceivedError ["+error.getErrorCode()+"]"+ error.getDescription().toString() );
+            if(error.getErrorCode() < 0){
+                android.support.v7.app.AlertDialog.Builder alert = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
+                alert.setPositiveButton("재시도", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        webview.reload();
+                        dialog.dismiss();     //닫기
+                    }
+                });
+                alert.setNegativeButton("닫기", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MainActivity.this.finish();
+                    }
+                });
+                alert.setMessage("인터넷 연결상태를 확인후 재시도 해주세요");
+                alert.show();
+            }
             super.onReceivedError(view, request, error);
         }
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url){
-            Log.d("HybridApp","shouldOverrideUrlLoading url="+url);
+            Log.d(TAG,"shouldOverrideUrlLoading url="+url);
             view.loadUrl(url);
             return true;
         }
@@ -366,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void sendKakao(final String type, final String title, final String imageUrl, final String link) {
-            Log.d("HybridApp", "sendKakao(" + type + "," + title + ", " + imageUrl + "," + link + ")");
+            Log.d(TAG, "sendKakao(" + type + "," + title + ", " + imageUrl + "," + link + ")");
             HashMap<String, String> paramMap = new HashMap();
             paramMap.put("type", type);
             paramMap.put("title", title);
@@ -377,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void sendSms(final String mobile_no, final String body) {
-            Log.d("HybridApp", "sendSms(" + mobile_no + "," + body + ")");
+            Log.d(TAG, "sendSms(" + mobile_no + "," + body + ")");
             HashMap<String, String> paramMap = new HashMap();
             paramMap.put("mobile_no", mobile_no);
             paramMap.put("body", body);
@@ -386,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void sendEmail(final String email, final String title, final String body) {
-            Log.d("HybridApp", "sendEmail(" + email + ", " + title + ", " + body + ")");
+            Log.d(TAG, "sendEmail(" + email + ", " + title + ", " + body + ")");
             HashMap<String, String> paramMap = new HashMap();
             paramMap.put("email", email);
             paramMap.put("title", title);
@@ -396,7 +417,7 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void makeACall(final String phone_number) {
-            Log.d("HybridApp", "makeACall(" + phone_number + ")");
+            Log.d(TAG, "makeACall(" + phone_number + ")");
             HashMap<String, String> paramMap = new HashMap();
             paramMap.put("phone_number", phone_number);
             sendHandMessage(MAKE_ACALL, paramMap);
@@ -404,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void uploadFile(final String action_url, final String enctype, final String callback) {
-            Log.d("HybridApp", "uploadFile(" + action_url + ", " + enctype + ", " + callback + ")");
+            Log.d(TAG, "uploadFile(" + action_url + ", " + enctype + ", " + callback + ")");
             HashMap<String, String> paramMap = new HashMap();
             paramMap.put("action_url", action_url);
             paramMap.put("enctype", enctype);
@@ -423,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 FileInputStream fileInputStream = new FileInputStream(fileName);
                 URL connectUrl = new URL(urlString);
-                Log.d("HybridApp", "HttpFileUpload / fileInputStream  is " + fileInputStream);
+                Log.d(TAG, "HttpFileUpload / fileInputStream  is " + fileInputStream);
 
                 // open connection
                 HttpURLConnection conn = (HttpURLConnection)connectUrl.openConnection();
@@ -447,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                 byte[] buffer = new byte[bufferSize];
                 int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
 
-                Log.d("HybridApp", "Image bytesAvailable="+bytesAvailable);
+                Log.d(TAG, "Image bytesAvailable="+bytesAvailable);
 
                 // read image
                 int writedSize = 0;
@@ -463,7 +484,7 @@ public class MainActivity extends AppCompatActivity {
                 dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
 
                 // close streams
-                Log.d("HybridApp" , "File is written complete size = "+writedSize);
+                Log.d(TAG , "File is written complete size = "+writedSize);
                 fileInputStream.close();
                 dos.flush(); // finish upload...
 
@@ -475,30 +496,30 @@ public class MainActivity extends AppCompatActivity {
                     b.append( (char)ch );
                 }
                 result =new String(b.toString().getBytes(), "utf-8");
-                Log.d("HybridApp", "result = " + result);
+                Log.d(TAG, "result = " + result);
                 dos.close();
             } catch (Exception e) {
-                Log.e("HybridApp", "exception " + e.getMessage());
+                Log.e(TAG, "exception " + e.getMessage());
             }
             return result;
         }
 
         @Override
         protected String doInBackground(String... strings) {
-            Log.d("HybridApp","doInBackground strings.length="+strings.length);
-            Log.d("HybridApp","doInBackground strings[0]"+strings[0]);
-            Log.d("HybridApp","doInBackground strings[1]"+strings[1]);
+            Log.d(TAG,"doInBackground strings.length="+strings.length);
+            Log.d(TAG,"doInBackground strings[0]"+strings[0]);
+            Log.d(TAG,"doInBackground strings[1]"+strings[1]);
             return HttpFileUpload(strings[0], strings[1]);
         }
 
         @Override
         protected void onPostExecute(String s) {
-            Log.d("HybridApp","onPostExecute s="+s.trim());
+            Log.d(TAG,"onPostExecute s="+s.trim());
             //결과가 성공여부인지도 따져야 한다.
             try {
                 JSONObject jsonObj = new JSONObject(s);
                 if( jsonObj.get("result").equals("Y")){
-                    Log.d("HybridApp", "onPostExecute result sucess call javascript:"+mCallbackMethod);
+                    Log.d(TAG, "onPostExecute result sucess call javascript:"+mCallbackMethod);
                     webview.loadUrl("javascript:"+mCallbackMethod);
                 } else {
                     AlertUtil.showAlert(MainActivity.this, "이미지 등록 실패 ("+jsonObj.get("resultMsg")+")");
