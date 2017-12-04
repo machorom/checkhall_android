@@ -1,38 +1,27 @@
 {
   "project_info": {
-    "project_number": "1028578626835",
-    "firebase_url": "https://checkhall-f5c7d.firebaseio.com",
-    "project_id": "checkhall-f5c7d",
-    "storage_bucket": "checkhall-f5c7d.appspot.com"
+    "project_number": "243043320845",
+    "firebase_url": "https://checkhall-98009.firebaseio.com",
+    "project_id": "checkhall-98009",
+    "storage_bucket": "checkhall-98009.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1028578626835:android:a36a0425ac1fd92c",
+        "mobilesdk_app_id": "1:243043320845:android:a36a0425ac1fd92c",
         "android_client_info": {
           "package_name": "com.checkhall"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1028578626835-t69fedoe4fmuaj3pf1u0hsnrvmg1h1lf.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.checkhall",
-            "certificate_hash": "672ca4adb0ecd87a10e27623e1a126962746d8be"
-          }
-        },
-        {
-          "client_id": "1028578626835-dnaveedtvrqvtsml1krv8htd71g9f6j6.apps.googleusercontent.com",
+          "client_id": "243043320845-3aq9ih5s6bpnlr3h1cnqdgl6v3ctmv0n.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBg_VK8hryStzhV5TgKHdIttCgUF1tKIGc"
-        },
-        {
-          "current_key": "AIzaSyAq3d7H7Cf3ftey9egpY10lCHAmsLGW6bY"
+          "current_key": "AIzaSyCp8Hawrcov2n4uaFS53OJIMflqhUgIqUw"
         }
       ],
       "services": {
@@ -40,20 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1028578626835-pouacmmssc2ial2b0kfh7u0b6u7ro2oq.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.checkhall"
-              }
-            },
-            {
-              "client_id": "1028578626835-dnaveedtvrqvtsml1krv8htd71g9f6j6.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

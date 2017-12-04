@@ -343,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                         dialog.dismiss();     //닫기
                     }
                 });
-                alert.setNegativeButton("닫기", new DialogInterface.OnClickListener() {
+                alert.setNegativeButton("앱종료", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         MainActivity.this.finish();
