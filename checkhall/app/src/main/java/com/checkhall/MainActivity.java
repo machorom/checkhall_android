@@ -207,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             url = "http://www.checkhall.com/member/login.jsp";
         }
+        Log.d("LCheckhall","MainActivity/getActionUrl() url="+url);
         return url;
     }
 

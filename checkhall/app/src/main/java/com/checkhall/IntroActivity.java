@@ -177,6 +177,7 @@ public class IntroActivity extends AppCompatActivity {
             Log.i(TAG,"intent with url=" + getIntent().getStringExtra("action_url"));
             Intent i = new Intent(IntroActivity.this, MainActivity.class);
             i.putExtra("action_url",getIntent().getStringExtra("action_url"));
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(i);
             finish();
             return true;
