@@ -228,13 +228,13 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isLastPag(){
         Log.d(TAG, "isLastPag url=" + webview.getUrl());
-        if( webview.getUrl().equals("http://www.checkhall.com/plan/")
-                || webview.getUrl().equals("http://www.checkhall.com/hall/")
-                || webview.getUrl().equals("http://www.checkhall.com/hall/index.jsp")
-                || webview.getUrl().equals("http://www.checkhall.com/")
-                || webview.getUrl().equals("http://www.checkhall.com/index.jsp")
-                || webview.getUrl().equals("http://www.checkhall.com/plan/index.jsp")
-                || webview.getUrl().equals("http://www.checkhall.com/member/login.jsp")
+        if( webview.getUrl().endsWith("/plan/")
+                || webview.getUrl().endsWith("/hall/")
+                || webview.getUrl().endsWith("/hall/index.jsp")
+                || webview.getUrl().endsWith(".com/")
+                || webview.getUrl().endsWith("/index.jsp")
+                || webview.getUrl().endsWith("/plan/index.jsp")
+                || webview.getUrl().endsWith("/member/login.jsp")
                 || !webview.canGoBack() ){
             return true;
         }
